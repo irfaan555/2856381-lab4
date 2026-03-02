@@ -1,4 +1,4 @@
-// DOM Element References
+// DOM Elements
 const countryInput = document.getElementById('country-input');
 const searchBtn = document.getElementById('search-btn');
 const loadingSpinner = document.getElementById('loading-spinner');
@@ -6,7 +6,13 @@ const countryInfo = document.getElementById('country-info');
 const borderingCountries = document.getElementById('bordering-countries');
 const errorMessage = document.getElementById('error-message');
 
-// Helper function to hide/show elements
+// FIX: Hide sections immediately when page loads
+countryInfo.classList.add('hidden');
+borderingCountries.classList.add('hidden');
+errorMessage.classList.add('hidden');
+loadingSpinner.classList.add('hidden'); // This stops the buffering sign on load
+
+// Show loading
 function showLoading() {
     loadingSpinner.classList.remove('hidden');
     countryInfo.classList.add('hidden');
@@ -14,20 +20,20 @@ function showLoading() {
     errorMessage.classList.add('hidden');
 }
 
+// Hide loading
 function hideLoading() {
     loadingSpinner.classList.add('hidden');
 }
 
+// Show error
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
-    countryInfo.classList.add('hidden');
-    borderingCountries.classList.add('hidden');
 }
 
-// Main Search Function
+// Main search function
 async function searchCountry(countryName) {
-    // Validate input
+
     if (!countryName.trim()) {
         showError("Please enter a country name.");
         return;
@@ -36,19 +42,19 @@ async function searchCountry(countryName) {
     showLoading();
 
     try {
-        // 1. Fetch Main Country Data
-        const response = await fetch(`https://restcountries.com/v3.1/name/${countryName}`);
-        
+        // Fetch country data
+        const response = await fetch(
+            `https://restcountries.com/v3.1/name/${countryName}`
+        );
+
         if (!response.ok) {
-            throw new Error("Country not found");
+            throw new Error("Country not found.");
         }
 
         const data = await response.json();
-        
-        // The API returns an array. We want the first result (most relevant match).
         const country = data[0];
 
-        // 2. Update DOM for Main Country Info
+        // Display country info
         countryInfo.innerHTML = `
             <h2>${country.name.common}</h2>
             <p><strong>Capital:</strong> ${country.capital ? country.capital[0] : 'N/A'}</p>
@@ -56,56 +62,65 @@ async function searchCountry(countryName) {
             <p><strong>Region:</strong> ${country.region}</p>
             <img src="${country.flags.svg}" alt="${country.name.common} flag">
         `;
+
         countryInfo.classList.remove('hidden');
 
-        // 3. Fetch Bordering Countries
-        borderingCountries.innerHTML = ''; // Clear previous results
-        
+        // Clear previous borders
+        borderingCountries.innerHTML = '';
+
         if (country.borders && country.borders.length > 0) {
+
             borderingCountries.classList.remove('hidden');
-            
-            // Create a title for the borders section
+
             const title = document.createElement('h3');
             title.textContent = "Bordering Countries:";
-            title.style.gridColumn = "1 / -1"; // Span across grid
+            title.style.gridColumn = "1 / -1";
             borderingCountries.appendChild(title);
 
-            // Loop through borders and fetch details
-            for (const code of country.borders) {
-                await fetchBorderCountry(code);
-            }
+            // Fetch borders in parallel
+            await Promise.all(
+                country.borders.map(code => fetchBorderCountry(code))
+            );
+
         } else {
             borderingCountries.classList.add('hidden');
         }
 
     } catch (error) {
-        console.error(error);
-        showError(error.message || "An error occurred while fetching data.");
+        showError(error.message || "An error occurred.");
     } finally {
         hideLoading();
     }
 }
 
-// Helper function to fetch and display specific border country
+// Fetch border country
 async function fetchBorderCountry(code) {
     try {
-        const response = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
+        const response = await fetch(
+            `https://restcountries.com/v3.1/alpha/${code}`
+        );
+
+        if (!response.ok) return;
+
         const data = await response.json();
         const borderCountry = data[0];
 
-        const borderDiv = document.createElement('div');
-        borderDiv.classList.add('border-item');
-        borderDiv.innerHTML = `
+        const div = document.createElement('div');
+        div.classList.add('border-item');
+
+        div.innerHTML = `
             <img src="${borderCountry.flags.svg}" alt="${borderCountry.name.common} flag">
             <p>${borderCountry.name.common}</p>
         `;
-        borderingCountries.appendChild(borderDiv);
+
+        borderingCountries.appendChild(div);
+
     } catch (error) {
-        console.error(`Could not fetch border country ${code}`);
+        console.error("Border fetch failed");
     }
 }
 
-// Event Listeners
+// Event listeners
 searchBtn.addEventListener('click', () => {
     searchCountry(countryInput.value);
 });
