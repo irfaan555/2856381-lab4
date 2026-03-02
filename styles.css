@@ -40,7 +40,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* Required: Loading Spinner (.spinner) */
+/* Spinner */
 .spinner {
     width: 40px;
     height: 40px;
@@ -51,13 +51,13 @@ button:hover {
     margin: 20px auto;
 }
 
-/* Required: Animation Keyframes */
+/* Required animation */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-/* Required: Country Card (.country-card) */
+/* Country Card */
 .country-card {
     background: white;
     padding: 20px;
@@ -75,7 +75,7 @@ button:hover {
     margin-top: 10px;
 }
 
-/* Required: Border Grid (.border-grid) */
+/* Border Grid */
 .border-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -96,7 +96,7 @@ button:hover {
     width: 60px;
 }
 
-/* Required: Error Styling (.error) */
+/* Error Styling */
 .error {
     color: #d9534f;
     background-color: #f2dede;
@@ -108,7 +108,7 @@ button:hover {
     text-align: center;
 }
 
-/* Required: Hidden State */
+/* Hidden State */
 .hidden {
     display: none;
 }
